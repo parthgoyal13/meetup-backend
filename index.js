@@ -79,6 +79,34 @@ app.get("/event/:eventId", async (req, res) => {
     res.status(500).json({ error: "Error in fetching event by id." });
   }
 });
+
+async function findEventByType(eventType) {
+  try {
+    const foundEventByType = await Event.find({ eventType });
+    return foundEventByType;
+  } catch (error) {
+    console.log(error);
+    throw error; // Ensure error is properly thrown
+  }
+}
+
+app.get("/events/:eventType", async (req, res) => {
+  try {
+    const { eventType } = req.params;
+    const eventByType = await findEventByType(eventType);
+
+    if (eventByType.length !== 0) {
+      res.status(200).json(eventByType);
+    } else {
+      res.status(404).json({ error: "No events found for this type" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching events", details: error.message });
+  }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);

@@ -86,14 +86,13 @@ async function findEventByType(eventType) {
     return foundEventByType;
   } catch (error) {
     console.log(error);
-    throw error; // Ensure error is properly thrown
+    throw error;
   }
 }
 
 app.get("/events/:eventType", async (req, res) => {
   try {
-    const { eventType } = req.params;
-    const eventByType = await findEventByType(eventType);
+    const eventByType = await findEventByType(req.params.eventType);
 
     if (eventByType.length !== 0) {
       res.status(200).json(eventByType);
@@ -101,9 +100,35 @@ app.get("/events/:eventType", async (req, res) => {
       res.status(404).json({ error: "No events found for this type" });
     }
   } catch (error) {
+    res.status(500).json({ error: "Error fetching events" });
+  }
+});
+
+async function findEventByTitleAndTag(title, tag) {
+  try {
+    const eventByTitleAndTag = await Event.find({
+      eventTitle: title,
+      eventTags: { $in: [tag] },
+    });
+    return eventByTitleAndTag;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+app.get("/event/titleAndTag/:title/:tag", async (req, res) => {
+  try {
+    const { title, tag } = req.params;
+    const eventTitleAndTag = await findEventByTitleAndTag(title, tag);
+    if (eventTitleAndTag.length !== 0) {
+      res.json(eventTitleAndTag);
+    } else {
+      res.status(404).json({ error: "No event found by title and tags" });
+    }
+  } catch (error) {
     res
       .status(500)
-      .json({ error: "Error fetching events", details: error.message });
+      .json({ error: "Error in fetching event by title and tags." });
   }
 });
 

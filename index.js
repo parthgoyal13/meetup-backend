@@ -107,10 +107,8 @@ app.get("/events/:eventType", async (req, res) => {
 async function findEventByTitleAndTag(title, tag) {
   try {
     const eventByTitleAndTag = await Event.find({
-      $or: [
-        { eventTitle: { $regex: searchQuery, $options: "i" } },
-        { eventTags: { $in: [searchQuery] } },
-      ],
+      eventTitle: title,
+      eventTags: tag,
     });
     return eventByTitleAndTag;
   } catch (error) {
@@ -118,14 +116,14 @@ async function findEventByTitleAndTag(title, tag) {
   }
 }
 
-app.get("//event/titleAndTag/:searchQuery", async (req, res) => {
+app.get("/event/titleAndTag/:title/:tag", async (req, res) => {
   try {
-    const { searchQuery } = req.params;
-    const eventTitleAndTag = await findEventByTitleAndTag(searchQuery);
+    const { title, tag } = req.params;
+    const eventTitleAndTag = await findEventByTitleAndTag(title, tag);
     if (eventTitleAndTag.length !== 0) {
       res.json(eventTitleAndTag);
     } else {
-      res.status(404).json({ error: "No events found by title or tags" });
+      res.status(404).json({ error: "No event found by title and tags" });
     }
   } catch (error) {
     res
